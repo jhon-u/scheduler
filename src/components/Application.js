@@ -8,6 +8,7 @@ import {
   getInterview,
   getInterviewersForDay,
 } from "../helpers/selectors";
+// axios.defaults.baseURL = "http://localhost:8001";
 
 export default function Application(props) {
   const [state, setState] = useState({
@@ -37,6 +38,46 @@ export default function Application(props) {
     });
   }, []);
 
+  const bookInterview = (id, interview) => {
+    console.log("bookInterview", id, interview);
+    const appointment = {
+      ...state.appointments[id],
+      interview: { ...interview },
+    };
+
+    const appointments = {
+      ...state.appointments,
+      [id]: appointment,
+    };
+
+    return axios
+      .put(`http://localhost:8001/api/appointments/${id}`, appointment)
+      .then((res) => {
+        setState({ ...state, appointments });
+      });
+  };
+
+  const cancelInterview = (id) => {
+    console.log("ID", id);
+ 
+    return axios
+      .delete(`http://localhost:8001/api/appointments/${id}`)
+      .then((res) => {
+        const appointment = {
+          ...state.appointments[id],
+          interview: null,
+        };
+    
+        const appointments = {
+          ...state.appointments,
+          [id]: appointment,
+        };
+
+        setState({ ...state, appointments });
+        console.log("STATE", state.appointments[id].interview);
+      });
+  };
+
   const schedule = appointments.map((appointment) => {
     const interview = getInterview(state, appointment.interview);
     return (
@@ -46,6 +87,8 @@ export default function Application(props) {
         time={appointment.time}
         interview={interview}
         interviewers={interviewers}
+        bookInterview={bookInterview}
+        cancelInterview={cancelInterview}
       />
     );
   });
