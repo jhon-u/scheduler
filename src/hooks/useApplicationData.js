@@ -23,8 +23,9 @@ export default function useApplicationData(initial) {
     };
 
     return axios.put(`/api/appointments/${id}`, appointment).then((res) => {
-      const days = updateSpots({ id, interview });
-      setState({ ...state, appointments, days });
+      const newState = { ...state, appointments };
+      const days = updateSpots(newState, appointments);
+      setState({ ...newState, days });
     });
   };
 
@@ -39,28 +40,26 @@ export default function useApplicationData(initial) {
         ...state.appointments,
         [id]: appointment,
       };
-      const days = updateSpots({ id, interview: null });
-      setState({ ...state, appointments, days });
+      const newState = { ...state, appointments };
+      const days = updateSpots(newState, appointments);
+      setState({ ...newState, days });
     });
   };
 
-  const updateSpots = ({ id, interview }) => {
-    const days = state.days.map((day) => {
-      let spots = 0;
-      if (day.name === state.day) {
-        if (interview && state.appointments[id].interview) {
-          spots = 0;
-        } else if (interview) {
-          spots = -1;
-        } else spots = 1;
+  const updateSpots = (state, appointments) => {
+    const dayObj = state.days.find((day) => day.name === state.day);
+    let spots = 0;
+    
+    for (const id of dayObj.appointments) {
+      const appointment = appointments[id];
+      if (!appointment.interview) {
+        spots++;
       }
-      return {
-        ...day,
-        spots: day.spots + spots,
-      };
-    });
+    }
 
-    return days;
+    const day = { ...dayObj, spots };
+
+    return state.days.map((d) => (d.name === state.day ? day : d));
   };
 
   useEffect(() => {
