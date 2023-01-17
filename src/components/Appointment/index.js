@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import "components/Appointment/styles.scss";
 import Header from "./Header";
 import Show from "./Show";
@@ -13,9 +13,13 @@ const SHOW = "SHOW";
 const CREATE = "CREATE";
 const SAVING = "SAVING";
 const DELETING = "DELETING";
+const EDITING = "EDITING";
 const CONFIRM = "CONFIRM";
 
 export default function Appointment(props) {
+  const [student, setStudent] = useState(""); 
+  const [interviewer, setInterviewer] = useState(null);
+
   const { mode, transition, back } = useVisualMode(
     props.interview ? SHOW : EMPTY
   );
@@ -39,6 +43,13 @@ export default function Appointment(props) {
     });
   };
 
+  const edit = (studentName, interviewer) => {
+    setStudent(studentName);
+    setInterviewer(interviewer)
+    console.log('ON EDIT', student, interviewer);
+    transition("EDITING");
+  };
+
   return (
     <article className="appointment">
       <Header time={props.time} />
@@ -47,7 +58,7 @@ export default function Appointment(props) {
         <Show
           name={props.interview.student}
           interviewer={props.interview.interviewer}
-          onEdit={() => console.log("Clicked onEdit")}
+          onEdit={edit}
           onDelete={() => transition(CONFIRM)}
         />
       )}
@@ -65,6 +76,15 @@ export default function Appointment(props) {
           message="Are you sure you would like to delete?"
           onCancel={() => back()}
           onConfirm={cancel}
+        />
+      )}
+      {mode === EDITING && (
+        <Form
+          interviewers={props.interviewers}
+          student={student}
+          interviewer={interviewer.id}
+          onCancel={() => back()}
+          onSave={save}
         />
       )}
     </article>
