@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+// State management
 export default function useApplicationData(initial) {
   const [state, setState] = useState({
     day: "Monday",
@@ -29,6 +30,7 @@ export default function useApplicationData(initial) {
     });
   };
 
+  // Cancels an appointment and makes an axios delete request
   const cancelInterview = (id) => {
     return axios.delete(`/api/appointments/${id}`).then((res) => {
       const appointment = {
@@ -46,6 +48,7 @@ export default function useApplicationData(initial) {
     });
   };
 
+  // Updates the spots available after booking or cancelling an appointment
   const updateSpots = (state, appointments) => {
     const dayObj = state.days.find((day) => day.name === state.day);
     let spots = 0;
@@ -62,6 +65,7 @@ export default function useApplicationData(initial) {
     return state.days.map((d) => (d.name === state.day ? day : d));
   };
 
+  // Calls the database and gets all the data for the initial state
   useEffect(() => {
     Promise.all([
       axios.get("/api/days"),
